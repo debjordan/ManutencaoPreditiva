@@ -1,4 +1,4 @@
-CREATE TABLE sensors (
+CREATE TABLE IF NOT EXISTS sensors (
     id SERIAL PRIMARY KEY,
     machine_id VARCHAR(50),
     vibration FLOAT,
@@ -6,7 +6,7 @@ CREATE TABLE sensors (
     timestamp TIMESTAMP
 );
 
-CREATE TABLE production (
+CREATE TABLE IF NOT EXISTS production (
     id SERIAL PRIMARY KEY,
     machine_id VARCHAR(50),
     cycle_time FLOAT,
@@ -18,7 +18,7 @@ CREATE TABLE production (
     timestamp TIMESTAMP
 );
 
-CREATE TABLE predictions (
+CREATE TABLE IF NOT EXISTS predictions (
     id SERIAL PRIMARY KEY,
     machine_id VARCHAR(50),
     failure_probability FLOAT,
