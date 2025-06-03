@@ -19,12 +19,16 @@ client.connect("mosquitto", 1883, 60)
 client.loop_start()
 
 while True:
+
+    logging.info("Data sensors generated!")
     sensor_data = {
         "machine_id": "M001",
         "vibration": round(random.uniform(0.1, 2.0), 2),
         "temperature": round(random.uniform(50.0, 100.0), 2),
         "timestamp": datetime.utcnow().isoformat() + "Z"
     }
+
+    logging.info("Data production generated!")
     production_data = {
         "machine_id": "M001",
         "cycle_time": round(random.uniform(10.0, 30.0), 2),
@@ -38,6 +42,8 @@ while True:
 
     client.publish("sensors/M001/data", json.dumps(sensor_data))
     logging.info(f"Published sensor data: {sensor_data}")
+
     client.publish("sensors/M001/production", json.dumps(production_data))
     logging.info(f"Published production data: {production_data}")
+
     time.sleep(5)
