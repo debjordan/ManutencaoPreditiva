@@ -5,6 +5,7 @@ using ManutencaoPreditiva.Api.Infrastructure.Repositories.Abstractions;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,7 +31,7 @@ namespace ManutencaoPreditiva.Api.Application.Services
                     MachineId = data.machine_id,
                     Vibration = data.vibration,
                     Temperature = data.temperature,
-                    Timestamp = DateTime.Parse(data.timestamp)
+                    Timestamp = ParseTimestampToUtc(data.timestamp)
                 };
 
                 await _sensorRepository.AddAsync(sensor);
@@ -91,6 +92,7 @@ namespace ManutencaoPreditiva.Api.Application.Services
         {
             try
             {
+                // var dados = new { Id = "", Nome = "MQ01" };
                 if (string.IsNullOrWhiteSpace(machineId))
                 {
                     return Result<List<SensorResponse>>.Failure(
@@ -126,10 +128,23 @@ namespace ManutencaoPreditiva.Api.Application.Services
             {
                 _logger.LogError(ex, "Error getting sensors for machine {MachineId}", machineId);
                 return Result<List<SensorResponse>>.Failure(
-                    $"Erro ao buscar sensores da máquina {machineId}: {ex.Message}",
-                    Result<List<SensorResponse>>.ResultErrorType.ServiceUnavailable
+                        $"Erro ao buscar sensores da máquina {machineId}: {ex.Message}",
+                        Result<List<SensorResponse>>.ResultErrorType.ServiceUnavailable
                 );
             }
+        }
+
+        private static DateTime ParseTimestampToUtc(string timestamp)
+        {
+            if (DateTime.TryParse(timestamp, null, DateTimeStyles.RoundtripKind, out var dateTime))
+            {
+                return dateTime.Kind == DateTimeKind.Utc
+                        ? dateTime
+                        : DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+            }
+
+            var parsed = DateTime.Parse(timestamp);
+            return DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
         }
     }
 }
