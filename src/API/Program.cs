@@ -1,6 +1,7 @@
 using ManutencaoPreditiva.Infrastructure;
 using ManutencaoPreditiva.Infrastructure.Data.Seeds;
 using ManutencaoPreditiva.Infrastructure.Data.Context;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<RegistrysContext>();
+    context.Database.Migrate();
     // await MachineSeeder.SeedAsync(context);
 }
 
