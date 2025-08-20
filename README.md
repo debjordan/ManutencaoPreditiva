@@ -233,14 +233,3 @@ mosquitto_pub -h localhost -t "test" -m "hello"
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-## 📞 Suporte
-
-Para suporte, abra uma issue no repositório ou entre em contato:
-- 📧 Email: [seu-email@exemplo.com]
-- 💬 Discord: [link-do-discord]
-- 📚 Wiki: [link-da-wiki]
