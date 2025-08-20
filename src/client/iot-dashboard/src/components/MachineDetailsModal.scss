@@ -1,0 +1,240 @@
+@use 'sass:map';
+@use 'tailwindcss/base';
+@use 'tailwindcss/components';
+@use 'tailwindcss/utilities';
+
+.modal-container {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+
+  .modal-content {
+    @apply bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto;
+
+    .modal-header {
+      @apply flex justify-between items-center p-6 border-b;
+
+      .modal-header-content {
+        @apply flex items-center space-x-4;
+
+        .modal-title {
+          @apply text-2xl font-bold text-gray-800;
+        }
+
+        .modal-status {
+          @apply px-2 py-0.5 rounded-full text-sm font-medium border;
+        }
+      }
+
+      .modal-close-button {
+        @apply text-gray-400 hover:text-gray-600 text-2xl font-bold;
+      }
+    }
+
+    .modal-body {
+      @apply p-6 space-y-6;
+
+      .executive-summary {
+        @apply bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200;
+
+        .section-title {
+          @apply text-lg font-semibold text-gray-800 mb-4;
+        }
+
+        .summary-grid {
+          @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+
+          .summary-item {
+            @apply text-center;
+
+            .summary-value {
+              @apply text-3xl font-bold;
+            }
+
+            .summary-label {
+              @apply text-sm text-gray-600;
+            }
+          }
+        }
+      }
+
+      .risk-trend {
+        @apply bg-white p-6 rounded-lg border border-gray-200;
+
+        .section-title {
+          @apply text-lg font-semibold text-gray-800 mb-4;
+        }
+
+        .chart-container {
+          @apply h-64 relative;
+
+          .chart-svg {
+            @apply border border-gray-200 rounded w-full h-full;
+          }
+
+          .chart-label-y {
+            @apply text-xs fill-gray-500;
+          }
+
+          .chart-label-x {
+            @apply text-xs fill-gray-500;
+          }
+        }
+      }
+
+      .details-grid {
+        @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+
+        .sensors-details {
+          @apply bg-white p-6 rounded-lg border border-gray-200;
+
+          .section-title {
+            @apply text-lg font-semibold text-gray-800 mb-4;
+          }
+
+          .sensors-content {
+            @apply space-y-4;
+
+            .sensor-item {
+              @apply flex justify-between items-center p-3 bg-gray-50 rounded;
+
+              .sensor-label {
+                @apply font-medium text-gray-700;
+              }
+
+              .sensor-value-container {
+                @apply flex items-center space-x-2;
+
+                .sensor-value {
+                  @apply font-bold;
+                }
+
+                .sensor-indicator {
+                  @apply w-3 h-3 rounded-full;
+                }
+              }
+            }
+          }
+
+          .sensors-empty {
+            @apply text-gray-500;
+          }
+        }
+
+        .maintenance-recommendations {
+          @apply bg-white p-6 rounded-lg border border-gray-200;
+
+          .section-title {
+            @apply text-lg font-semibold text-gray-800 mb-4;
+          }
+
+          .maintenance-content {
+            @apply space-y-4;
+
+            .maintenance-item {
+              @apply p-4 bg-gray-50 rounded-lg;
+
+              .maintenance-urgency {
+                @apply flex justify-between items-start mb-2;
+
+                .maintenance-label {
+                  @apply font-semibold text-gray-700;
+                }
+
+                .maintenance-value {
+                  @apply font-bold;
+                }
+              }
+
+              .maintenance-action {
+                @apply text-sm text-gray-600 mb-3;
+              }
+
+              .maintenance-details {
+                @apply grid grid-cols-2 gap-4 text-sm;
+
+                .maintenance-label {
+                  @apply font-medium text-gray-700;
+                }
+
+                .maintenance-value {
+                  @apply text-gray-600;
+                }
+              }
+            }
+
+            .maintenance-history {
+              @apply border-t pt-4;
+
+              .maintenance-history-title {
+                @apply font-semibold text-gray-700 mb-2;
+              }
+
+              .history-items {
+                @apply space-y-2 text-sm;
+
+                .history-item {
+                  @apply flex justify-between;
+
+                  .history-label {
+                    @apply text-gray-600;
+                  }
+
+                  .history-value {
+                    @apply text-gray-800;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .kpis {
+        @apply bg-white p-6 rounded-lg border border-gray-200;
+
+        .section-title {
+          @apply text-lg font-semibold text-gray-800 mb-4;
+        }
+
+        .kpis-grid {
+          @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+
+          .kpi-item {
+            @apply text-center p-4 rounded-lg;
+
+            .kpi-value {
+              @apply text-2xl font-bold;
+            }
+
+            .kpi-label {
+              @apply text-sm text-gray-600;
+            }
+          }
+        }
+      }
+
+      .alerts {
+        @apply bg-white p-6 rounded-lg border border-gray-200;
+
+        .section-title {
+          @apply text-lg font-semibold text-gray-800 mb-4;
+        }
+
+        .alerts-content {
+          @apply space-y-2;
+
+          .alert-item {
+            @apply flex items-center p-3 border rounded-lg;
+
+            .alert-indicator {
+              @apply w-2 h-2 rounded-full mr-3;
+            }
+
+            .alert-text {
+              @apply font-medium;
+            }
+          }
+        }
+      }
+    }
+  }
+}

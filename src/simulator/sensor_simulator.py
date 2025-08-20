@@ -13,31 +13,58 @@ def on_connect(client, userdata, flags, rc):
     else:
         logging.error(f"Failed to connect, return code {rc}")
 
-client = mqtt.Client()
+def connect_with_retry(client, host, port, keepalive, max_retries=5, delay=5):
+    for attempt in range(max_retries):
+        try:
+            client.connect(host, port, keepalive)
+            return True
+        except Exception as e:
+            logging.error(f"Connection attempt {attempt + 1} failed: {e}")
+            time.sleep(delay)
+    logging.error("Max retries reached. Could not connect to broker.")
+    return False
+
+client = mqtt.Client(protocol=mqtt.MQTTv311)
 client.on_connect = on_connect
-client.connect("mosquitto", 1883, 60)
+
+if not connect_with_retry(client, "localhost", 1883, 60):
+    exit(1)
+
 client.loop_start()
 
-while True:
-    sensor_data = {
-        "machine_id": "M001",
-        "vibration": round(random.uniform(0.1, 2.0), 2),
-        "temperature": round(random.uniform(50.0, 100.0), 2),
-        "timestamp": datetime.utcnow().isoformat() + "Z"
-    }
-    production_data = {
-        "machine_id": "M001",
-        "cycle_time": round(random.uniform(10.0, 30.0), 2),
-        "man_time": round(random.uniform(5.0, 20.0), 2),
-        "machine_time": round(random.uniform(10.0, 40.0), 2),
-        "availability": round(random.uniform(0.8, 1.0), 2),
-        "performance": round(random.uniform(0.7, 1.0), 2),
-        "quality": round(random.uniform(0.85, 1.0), 2),
-        "timestamp": datetime.utcnow().isoformat() + "Z"
-    }
+# Lista de máquinas para simular
+machines = ["M1", "M2", "M3", "M4", "M5", "M6"]
 
-    client.publish("sensors/M001/data", json.dumps(sensor_data))
-    logging.info(f"Published sensor data: {sensor_data}")
-    client.publish("sensors/M001/production", json.dumps(production_data))
-    logging.info(f"Published production data: {production_data}")
-    time.sleep(5)
+try:
+    while True:
+        for machine_id in machines:
+            # Gerar dados de sensores para cada máquina
+            sensor_data = {
+                "machine_id": machine_id,
+                "vibration": round(random.uniform(8.0, 15.0), 2),  # Range que pode gerar alertas
+                "temperature": round(random.uniform(45.0, 70.0), 2),  # Range que pode gerar alertas
+                "humidity": round(random.uniform(30.0, 80.0), 2),
+                "pressure": round(random.uniform(4.0, 6.0), 2),  # Range que pode gerar alertas
+                "voltage": round(random.uniform(220.0, 240.0), 2),
+                "current": round(random.uniform(5.0, 20.0), 2),
+                "power": round(random.uniform(1.0, 5.0), 2),
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+
+            try:
+                # Publicar dados no tópico específico da máquina
+                topic = f"sensors/{machine_id}/data"
+                client.publish(topic, json.dumps(sensor_data))
+                logging.info(f"Published data for {machine_id}: vibration={sensor_data['vibration']}, temp={sensor_data['temperature']}, pressure={sensor_data['pressure']}")
+
+            except TypeError as e:
+                logging.error(f"Failed to serialize data for {machine_id}: {e}")
+                continue
+
+        time.sleep(5)  # Aguarda 5 segundos antes do próximo ciclo
+
+except KeyboardInterrupt:
+    logging.info("Stopping sensor simulator...")
+finally:
+    client.loop_stop()
+    client.disconnect()

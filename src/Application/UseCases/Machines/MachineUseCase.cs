@@ -1,1 +1,0 @@
-// estratificar aqui 
