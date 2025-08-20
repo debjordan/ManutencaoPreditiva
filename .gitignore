@@ -28,7 +28,7 @@ venv/
 ENV/
 *.env
 *.env.*
-
+*.ven/
 # Jupyter Notebooks
 .ipynb_checkpoints
 
@@ -115,3 +115,4 @@ logs/
 *.local
 *.secrets
 *.bak
+.venv/
