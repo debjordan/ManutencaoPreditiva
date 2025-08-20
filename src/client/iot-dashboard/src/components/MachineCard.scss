@@ -1,0 +1,85 @@
+@use 'sass:map';
+@use 'tailwindcss/base';
+@use 'tailwindcss/components';
+@use 'tailwindcss/utilities';
+
+.machine-card {
+  @apply bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow relative;
+
+  &-header {
+    @apply flex justify-between items-center mb-4;
+
+    &-title {
+      @apply text-xl font-bold text-gray-800;
+    }
+
+    &-status {
+      @apply px-3 py-1 rounded-full text-sm font-medium border;
+      border-radius: 8px
+    }
+  }
+
+  &-content {
+    @apply space-y-3;
+  }
+
+  &-grid {
+    @apply grid grid-cols-2 gap-4;
+
+    .machine-card-metric {
+      @apply bg-gray-50 p-3 rounded;
+
+      &-label {
+        @apply text-sm text-gray-600;
+      }
+
+      &-value {
+        @apply text-lg font-semibold;
+      }
+    }
+  }
+
+  &-secondary-grid {
+    @apply grid grid-cols-3 gap-2 mt-3 text-xs;
+
+    .machine-card-secondary-metric {
+      @apply bg-blue-50 p-2 rounded text-center;
+
+      .machine-card-secondary-label {
+        @apply text-blue-600 font-medium;
+      }
+
+      .machine-card-secondary-value {
+        @apply text-blue-800;
+      }
+    }
+  }
+
+  &-footer {
+    @apply border-t pt-3;
+
+    .machine-card-timestamp {
+      @apply text-xs text-gray-500;
+    }
+  }
+
+  &-empty {
+    @apply text-center py-8;
+
+    &-icon {
+      @apply text-gray-400 text-4xl mb-2;
+    }
+
+    &-text {
+      @apply text-gray-500;
+    }
+
+    &-subtext {
+      @apply text-sm text-gray-400;
+    }
+  }
+
+  &-button {
+    @apply absolute bottom-4 right-4 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg transition-all duration-200 hover:scale-110;
+  }
+}
