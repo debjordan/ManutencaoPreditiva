@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY src/simulator/requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/simulator/ .
+
+RUN mkdir -p /app/data
+
+COPY docker/scripts/start-simulator.sh /app/start-simulator.sh
+RUN chmod +x /app/start-simulator.sh
+
+EXPOSE 1883
+
+CMD ["/app/start-simulator.sh"]
