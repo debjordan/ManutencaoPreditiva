@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 5000
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY src/api/IoTDataApi/IoTDataApi.csproj src/api/IoTDataApi/
+
+RUN dotnet restore "src/api/IoTDataApi/IoTDataApi.csproj"
+
+COPY src/api/IoTDataApi/ src/api/IoTDataApi/
+
+WORKDIR "/src/src/api/IoTDataApi"
+
+RUN dotnet build "IoTDataApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "IoTDataApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+
+RUN mkdir -p /app/data
+
+COPY --from=publish /app/publish .
+
+COPY docker/scripts/configure-api.sh /app/configure-api.sh
+RUN chmod +x /app/configure-api.sh
+
+ENTRYPOINT ["/app/configure-api.sh"]
