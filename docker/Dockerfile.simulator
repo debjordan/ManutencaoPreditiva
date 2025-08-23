@@ -1,22 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+COPY src/simulator/sensor_simulator.py .
+COPY src/simulator/subscriber.py .
 
-COPY src/simulator/requirements.txt .
+RUN pip install --no-cache-dir paho-mqtt
 
-RUN pip install --no-cache-dir -r requirements.txt
+ARG CMD="sensor_simulator.py"
+ENV CMD=${CMD}
 
-COPY src/simulator/ .
+ENV MQTT_HOST=mosquitto
+ENV MQTT_PORT=1883
 
-RUN mkdir -p /app/data
-
-COPY docker/scripts/start-simulator.sh /app/start-simulator.sh
-RUN chmod +x /app/start-simulator.sh
-
-EXPOSE 1883
-
-CMD ["/app/start-simulator.sh"]
+CMD ["sh", "-c", "python $CMD"]

@@ -6,28 +6,38 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-var possiblePaths = new[]
-{
-    Path.GetFullPath("../../../simulator/iot.db"),
-    Path.GetFullPath("../../simulator/iot.db"),
-    Path.GetFullPath("../simulator/iot.db"),
-    Path.GetFullPath("./simulator/iot.db"),
-    "/home/hawk/lab_projects/ManutencaoPreditiva/src/simulator/iot.db"
-};
+// Configuração do caminho do banco de dados
+string dbPath;
 
-string dbPath = null;
-foreach (var path in possiblePaths)
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
 {
-    if (File.Exists(path))
+    // No container, o banco está montado neste caminho
+    dbPath = "/app/simulator/iot.db";
+    Console.WriteLine("Running in container, using container DB path");
+}
+else
+{
+    // Desenvolvimento local
+    var possiblePaths = new[]
     {
-        dbPath = path;
-        break;
-    }
+        "/app/simulator/iot.db",
+        Path.GetFullPath("simulator/iot.db"),
+        Path.GetFullPath("../../../simulator/iot.db"),
+        Path.GetFullPath("../../simulator/iot.db"),
+        Path.GetFullPath("../simulator/iot.db"),
+        "/home/hawk/lab_projects/ManutencaoPreditiva/src/simulator/iot.db"
+    };
+
+    dbPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[0];
 }
 
-if (dbPath == null)
+Console.WriteLine($"Using SQLite DB at: {dbPath}");
+
+// Garante que o diretório existe
+var directory = Path.GetDirectoryName(dbPath);
+if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
 {
-    dbPath = possiblePaths[0];
+    Directory.CreateDirectory(directory);
 }
 
 var connectionString = $"Data Source={dbPath}";
@@ -36,9 +46,9 @@ builder.Services.AddDbContext<IoTDataContext>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:8080", "http://localhost:3000")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -55,11 +65,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowLocalhost");
-
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-Console.WriteLine("API starting on http://localhost:5000");
-app.Run("http://localhost:5000");
+app.Run("http://0.0.0.0:5000");
