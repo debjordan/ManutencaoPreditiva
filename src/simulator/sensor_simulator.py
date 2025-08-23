@@ -4,8 +4,12 @@ import json
 import random
 import logging
 from datetime import datetime
+import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+host = os.getenv("MQTT_HOST", "localhost")
+port = int(os.getenv("MQTT_PORT", 1883))
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -27,42 +31,31 @@ def connect_with_retry(client, host, port, keepalive, max_retries=5, delay=5):
 client = mqtt.Client(protocol=mqtt.MQTTv311)
 client.on_connect = on_connect
 
-if not connect_with_retry(client, "localhost", 1883, 60):
+if not connect_with_retry(client, host, port, 60):
     exit(1)
 
 client.loop_start()
 
-# Lista de máquinas para simular
 machines = ["M1", "M2", "M3", "M4", "M5", "M6"]
 
 try:
     while True:
         for machine_id in machines:
-            # Gerar dados de sensores para cada máquina
             sensor_data = {
                 "machine_id": machine_id,
-                "vibration": round(random.uniform(8.0, 15.0), 2),  # Range que pode gerar alertas
-                "temperature": round(random.uniform(45.0, 70.0), 2),  # Range que pode gerar alertas
+                "vibration": round(random.uniform(8.0, 15.0), 2),
+                "temperature": round(random.uniform(45.0, 70.0), 2),
                 "humidity": round(random.uniform(30.0, 80.0), 2),
-                "pressure": round(random.uniform(4.0, 6.0), 2),  # Range que pode gerar alertas
+                "pressure": round(random.uniform(4.0, 6.0), 2),
                 "voltage": round(random.uniform(220.0, 240.0), 2),
                 "current": round(random.uniform(5.0, 20.0), 2),
                 "power": round(random.uniform(1.0, 5.0), 2),
                 "timestamp": datetime.utcnow().isoformat() + "Z"
             }
-
-            try:
-                # Publicar dados no tópico específico da máquina
-                topic = f"sensors/{machine_id}/data"
-                client.publish(topic, json.dumps(sensor_data))
-                logging.info(f"Published data for {machine_id}: vibration={sensor_data['vibration']}, temp={sensor_data['temperature']}, pressure={sensor_data['pressure']}")
-
-            except TypeError as e:
-                logging.error(f"Failed to serialize data for {machine_id}: {e}")
-                continue
-
-        time.sleep(5)  # Aguarda 5 segundos antes do próximo ciclo
-
+            topic = f"sensors/{machine_id}/data"
+            client.publish(topic, json.dumps(sensor_data))
+            logging.info(f"Published data for {machine_id}: vibration={sensor_data['vibration']}, temp={sensor_data['temperature']}, pressure={sensor_data['pressure']}")
+        time.sleep(5)
 except KeyboardInterrupt:
     logging.info("Stopping sensor simulator...")
 finally:
