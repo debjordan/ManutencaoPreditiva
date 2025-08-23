@@ -10,10 +10,22 @@ Thumbs.db
 .gitignore
 .gitattributes
 
-# ---- Node.js (caso algum microserviço use) ----
+# ---- Node.js / Node-RED ----
 node_modules/
 npm-debug.log
 yarn-error.log
+# Ignorar dependências e arquivos internos do Node-RED
+docker/nodered/data/node_modules/
+docker/nodered/data/.config.runtime.json
+docker/nodered/data/.sessions.json
+docker/nodered/data/.config.*
+docker/nodered/data/lib/
+docker/nodered/data/*.backup
+docker/nodered/data/*.cred
+
+# (Opcional) manter apenas os fluxos do Node-RED, ignore tudo menos flows.json:
+# Se você quiser versionar o fluxo:
+# !docker/nodered/data/flows*.json
 
 # ---- Python ----
 __pycache__/
