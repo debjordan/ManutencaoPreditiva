@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 host = os.getenv("MQTT_HOST", "localhost")
 port = int(os.getenv("MQTT_PORT", 1883))
 
-# Prepara o banco de dados
 db_path = os.path.join(os.getcwd(), "data", "iot.db")
 os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
@@ -31,7 +30,6 @@ except sqlite3.Error as e:
     logger.error(f"Failed to initialize database: {e}")
     exit(1)
 
-# Callbacks MQTT
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         logger.info("Connected to MQTT Broker!")
@@ -55,7 +53,6 @@ def on_message(client, userdata, msg):
     except Exception as e:
         logger.error(f"Error processing message: {e}")
 
-# Instancia o cliente MQTT ANTES de usar
 client = mqtt.Client(protocol=mqtt.MQTTv311)
 client.on_connect = on_connect
 client.on_message = on_message

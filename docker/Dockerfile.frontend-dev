@@ -2,12 +2,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copia os arquivos do frontend
 COPY src/client/iot-dashboard/package*.json ./
 
 RUN npm ci
 
-# Copia o resto do código do frontend
 COPY src/client/iot-dashboard/ .
 
 WORKDIR /app/src/client/iot-dashboard
