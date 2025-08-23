@@ -1,11 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copia o arquivo do projeto - ajuste o caminho conforme sua estrutura
 COPY ./src/api/IoTDataApi/IoTDataApi.csproj ./api/
 RUN dotnet restore ./api/IoTDataApi.csproj
 
-# Copia o resto do código da API
 COPY ./src/api/IoTDataApi/ ./api/
 
 WORKDIR /src/api
@@ -14,7 +12,6 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Cria o diretório para o banco de dados
 RUN mkdir -p /app/simulator
 
 COPY --from=build /app/publish .

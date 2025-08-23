@@ -6,18 +6,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Configuração do caminho do banco de dados
 string dbPath;
 
 if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
 {
-    // No container, o banco está montado neste caminho
     dbPath = "/app/simulator/iot.db";
     Console.WriteLine("Running in container, using container DB path");
 }
 else
 {
-    // Desenvolvimento local
     var possiblePaths = new[]
     {
         "/app/simulator/iot.db",
@@ -33,7 +30,6 @@ else
 
 Console.WriteLine($"Using SQLite DB at: {dbPath}");
 
-// Garante que o diretório existe
 var directory = Path.GetDirectoryName(dbPath);
 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
 {
