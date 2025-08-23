@@ -11,7 +11,6 @@ string dbPath;
 if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
 {
     dbPath = "/app/simulator/iot.db";
-    Console.WriteLine("Running in container, using container DB path");
 }
 else
 {
@@ -27,8 +26,6 @@ else
 
     dbPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[0];
 }
-
-Console.WriteLine($"Using SQLite DB at: {dbPath}");
 
 var directory = Path.GetDirectoryName(dbPath);
 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
