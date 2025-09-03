@@ -4,11 +4,11 @@ Sistema completo de monitoramento IoT para manutenção preditiva de máquinas i
 
 ![Dashboard Preview](https://via.placeholder.com/800x400?text=IoT+Dashboard+Preview)
 
-## 🚀 Visão Geral
+## Visão Geral
 
 O sistema simula máquinas industriais com sensores que enviam dados via MQTT. Uma API REST fornece acesso aos dados armazenados em SQLite, e um dashboard web exibe informações em tempo real com sistema de alertas baseado em thresholds.
 
-## 🏗️ Arquitetura
+##  Arquitetura
 
 ```mermaid
 graph TD
@@ -34,7 +34,7 @@ graph TD
 - **Tailwind CSS** - Estilização
 - **Webpack** - Build system
 
-## 📊 Dados Monitorados
+## Dados Monitorados
 
 | Sensor | Faixa | Normal | Alerta | Crítico |
 |--------|-------|--------|--------|---------|
@@ -46,7 +46,7 @@ graph TD
 | **Corrente** | 5-20A | - | - | - |
 | **Potência** | 1-5kW | - | - | - |
 
-## 🚀 Início Rápido
+## Início Rápido
 
 ### Pré-requisitos
 
@@ -104,7 +104,7 @@ npm start
 http://localhost:8080
 ```
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 ManutencaoPreditiva/
@@ -126,7 +126,7 @@ ManutencaoPreditiva/
 └── .gitignore
 ```
 
-## 🌐 Endpoints da API
+## Endpoints da API
 
 ### Base URL: `http://localhost:5000`
 
@@ -182,7 +182,7 @@ curl http://localhost:5000/api/iot/machine/M1
 - **API:** Requests e conexão com banco
 - **Frontend:** Console do navegador (F12)
 
-## 🛠️ Troubleshooting
+##  Troubleshooting
 
 ### Problema: Tela em branco no frontend
 **Soluções:**
@@ -209,7 +209,7 @@ mosquitto_pub -h localhost -t "test" -m "hello"
 2. Verificar caminho do banco no Program.cs
 3. Verificar permissões de arquivo
 
-## 📈 Próximos Passos
+## Próximos Passos
 
 ### Funcionalidades Planejadas
 - [ ] **Histórico de Dados** - Gráficos temporais
@@ -226,7 +226,7 @@ mosquitto_pub -h localhost -t "test" -m "hello"
 - [ ] **Monitoring** - APM e observabilidade
 - [ ] **Scaling** - Suporte a mais máquinas
 
-## 🤝 Contribuição
+## Contribuição
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
