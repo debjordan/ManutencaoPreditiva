@@ -1,0 +1,117 @@
+# ---- Geral ----
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Git ----
+.gitignore
+.gitattributes
+
+# ---- Node.js (caso algum microserviço use) ----
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+.eggs/
+env/
+venv/
+ENV/
+*.env
+*.env.*
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# ---- C# / .NET ----
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+*.cache/
+*.dbmdl
+*.dbml
+*.pdb
+*.mdb
+*.log
+*.ldf
+*.ndf
+*.rdl.data
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+*.psess
+*.vsp
+*.vspx
+*.vspscc
+*.vssscc
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# ASP.NET
+App_Data/
+*.Publish.xml
+*.pubxml
+*.publishproj
+
+# Rider / JetBrains
+.idea/
+
+# ---- Visual Studio Code ----
+.vscode/
+
+# ---- Docker (caso use) ----
+**/Dockerfile
+**/docker-compose.yml
+**/.dockerignore
+
+# ---- Testes ----
+.coverage
+*.coverage
+*.cov
+*.testresult
+*.trx
+TestResults/
+nunit-*.xml
+test-output/
+
+# ---- Outros que podem ser úteis ----
+*.sqlite
+*.db
+*.zip
+*.tar.gz
+
+# ---- Terraform (caso use infraestrutura como código) ----
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# ---- Logs personalizados ----
+logs/
+*.log
+*.out
+
+# ---- Certificados (caso use) ----
+*.pem
+*.key
+*.crt
+
+# ---- Configs pessoais ----
+*.local
+*.secrets
+*.bak
