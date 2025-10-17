@@ -6,12 +6,10 @@
     <RootNamespace>IoTDataApi</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IoTDataApi.Application\IoTDataApi.Application.csproj" />
-    <ProjectReference Include="..\IoTDataApi.Infrastructure\IoTDataApi.Infrastructure.csproj" />
+    <ProjectReference Include="../IoTDataApi.Application/IoTDataApi.Application.csproj" />
+    <ProjectReference Include="../IoTDataApi.Infrastructure/IoTDataApi.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
