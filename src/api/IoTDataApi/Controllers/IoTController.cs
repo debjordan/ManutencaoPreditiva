@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using IoTDataApi.Data;
+using IoTDataApi.Application.Interfaces;
+using IoTDataApi.Domain.Entities;
 
 namespace IoTDataApi.Controllers;
 
@@ -8,31 +8,24 @@ namespace IoTDataApi.Controllers;
 [ApiController]
 public class IoTController : ControllerBase
 {
-    private readonly IoTDataContext _context;
+    private readonly IIoTDataService _iotDataService;
 
-    public IoTController(IoTDataContext context)
+    public IoTController(IIoTDataService iotDataService)
     {
-        _context = context;
+        _iotDataService = iotDataService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllData()
+    public async Task<ActionResult<IEnumerable<IoTData>>> GetAllData()
     {
-        var data = await _context.IoTData
-            .OrderByDescending(d => d.ReceivedAt)
-            .Take(100)
-            .ToListAsync();
+        var data = await _iotDataService.GetAllDataAsync();
         return Ok(data);
     }
 
     [HttpGet("machine/{machineId}")]
-    public async Task<IActionResult> GetMachineData(string machineId)
+    public async Task<ActionResult<IEnumerable<IoTData>>> GetMachineData(string machineId)
     {
-        var data = await _context.IoTData
-            .Where(d => d.Topic.Contains(machineId))
-            .OrderByDescending(d => d.ReceivedAt)
-            .Take(100)
-            .ToListAsync();
+        var data = await _iotDataService.GetMachineDataAsync(machineId);
         return Ok(data);
     }
 }

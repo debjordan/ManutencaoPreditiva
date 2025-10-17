@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using IoTDataApi.Data;
+using IoTDataApi.Infrastructure.Data;
+using IoTDataApi.Infrastructure.Repositories;
+using IoTDataApi.Application.Interfaces;
+using IoTDataApi.Application.Services;
+using IoTDataApi.Domain.Interfaces;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +25,6 @@ else
         Path.GetFullPath("../../../simulator/iot.db"),
         Path.GetFullPath("../../simulator/iot.db"),
         Path.GetFullPath("../simulator/iot.db"),
-        "/home/hawk/lab_projects/ManutencaoPreditiva/src/simulator/iot.db"
     };
 
     dbPath = possiblePaths.FirstOrDefault(File.Exists) ?? possiblePaths[0];
@@ -36,6 +39,9 @@ if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
 var connectionString = $"Data Source={dbPath}";
 builder.Services.AddDbContext<IoTDataContext>(options =>
     options.UseSqlite(connectionString));
+
+builder.Services.AddScoped<IIoTDataRepository, IoTDataRepository>();
+builder.Services.AddScoped<IIoTDataService, IoTDataService>();
 
 builder.Services.AddCors(options =>
 {
