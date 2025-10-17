@@ -11,11 +11,11 @@ Dashboard web responsivo para monitoramento em tempo real de máquinas industria
 
 ## Funcionalidades
 
-- 📊 **Monitoramento em Tempo Real** - Atualização automática a cada 5 segundos
-- 🚨 **Sistema de Alertas** - Status visual baseado em thresholds dos sensores
-- 📱 **Design Responsivo** - Layout adaptativo para diferentes telas
-- 🎨 **Interface Moderna** - UI clean com Tailwind CSS
-- ⚡ **Performance** - Componentes otimizados com React
+- **Monitoramento em Tempo Real** - Atualização automática a cada 5 segundos
+- **Sistema de Alertas** - Status visual baseado em thresholds dos sensores
+- **Design Responsivo** - Layout adaptativo para diferentes telas
+- **Interface Moderna** - UI clean com Tailwind CSS
+- **Performance** - Componentes otimizados com React
 
 ## Status dos Sensores
 
