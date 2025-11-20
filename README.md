@@ -1,14 +1,14 @@
-# Sistema IoT - Manutenção Preditiva
+# IoT System - Predictive Maintenance
 
-Sistema completo de monitoramento IoT para manutenção preditiva de máquinas industriais, composto por simulador de sensores, API REST e dashboard web em tempo real.
+Complete IoT monitoring system for predictive maintenance of industrial machinery, featuring sensor simulator, REST API, and real-time web dashboard.
 
 ![Dashboard Preview](https://via.placeholder.com/800x400?text=IoT+Dashboard+Preview)
 
-## Visão Geral
+## Overview
 
-O sistema simula máquinas industriais com sensores que enviam dados via MQTT. Uma API REST fornece acesso aos dados armazenados em SQLite, e um dashboard web exibe informações em tempo real com sistema de alertas baseado em thresholds.
+The system simulates industrial machines with sensors that send data via MQTT. A REST API provides access to data stored in SQLite, and a web dashboard displays real-time information with threshold-based alert system.
 
-##  Arquitetura
+## Architecture
 
 ```mermaid
 graph TD
@@ -19,36 +19,36 @@ graph TD
     E --> F[React Dashboard]
 ```
 
-## 🔧 Tecnologias
+## 🔧 Technologies
 
 ### Backend
-- **Python** - Simulação de sensores e coleta de dados
-- **MQTT** - Comunicação IoT
-- **SQLite** - Armazenamento local
-- **ASP.NET Core** - API REST
+- **Python** - Sensor simulation and data collection
+- **MQTT** - IoT communication
+- **SQLite** - Local storage
+- **ASP.NET Core** - REST API
 - **Entity Framework** - ORM
 
 ### Frontend
-- **React 18** - Interface de usuário
+- **React 18** - User interface
 - **TypeScript** - Type safety
-- **Tailwind CSS** - Estilização
+- **Tailwind CSS** - Styling
 - **Webpack** - Build system
 
-## Dados Monitorados
+## Monitored Data
 
-| Sensor | Faixa | Normal | Alerta | Crítico |
+| Sensor | Range | Normal | Alert | Critical |
 |--------|-------|--------|--------|---------|
-| **Vibração** | 8.0-15.0 | ≤ 10.0 | 10.1-12.0 | > 12.0 |
-| **Temperatura** | 45-70°C | ≤ 55°C | 55.1-60°C | > 60°C |
-| **Pressão** | 4.0-6.0 bar | ≤ 5.0 | 5.1-5.5 | > 5.5 |
-| **Umidade** | 30-80% | - | - | - |
-| **Tensão** | 220-240V | - | - | - |
-| **Corrente** | 5-20A | - | - | - |
-| **Potência** | 1-5kW | - | - | - |
+| **Vibration** | 8.0-15.0 | ≤ 10.0 | 10.1-12.0 | > 12.0 |
+| **Temperature** | 45-70°C | ≤ 55°C | 55.1-60°C | > 60°C |
+| **Pressure** | 4.0-6.0 bar | ≤ 5.0 | 5.1-5.5 | > 5.5 |
+| **Humidity** | 30-80% | - | - | - |
+| **Voltage** | 220-240V | - | - | - |
+| **Current** | 5-20A | - | - | - |
+| **Power** | 1-5kW | - | - | - |
 
-## Início Rápido
+## Quick Start
 
-### Pré-requisitos
+### Prerequisites
 
 ```bash
 # Python 3.8+
@@ -65,13 +65,13 @@ sudo apt install mosquitto mosquitto-clients
 sudo systemctl start mosquitto
 ```
 
-### 1. Clonar o Repositório
+### 1. Clone Repository
 ```bash
 git clone <repository-url>
 cd ManutencaoPreditiva
 ```
 
-### 2. Iniciar o Simulador
+### 2. Start Simulator
 ```bash
 # Terminal 1 - Subscriber
 cd src/simulator
@@ -83,7 +83,7 @@ cd src/simulator
 python sensor_simulator.py
 ```
 
-### 3. Iniciar a API
+### 3. Start API
 ```bash
 # Terminal 3
 cd src/api/IoTDataApi
@@ -91,7 +91,7 @@ dotnet restore
 dotnet run
 ```
 
-### 4. Iniciar o Frontend
+### 4. Start Frontend
 ```bash
 # Terminal 4
 cd src/client/iot-dashboard
@@ -99,43 +99,43 @@ npm install
 npm start
 ```
 
-### 5. Acessar o Dashboard
+### 5. Access Dashboard
 ```
 http://localhost:8080
 ```
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 ManutencaoPreditiva/
 ├── src/
-│   ├── simulator/                 # Simulação IoT
-│   │   ├── sensor_simulator.py    # Gerador de dados
-│   │   ├── subscriber.py          # Consumidor MQTT
-│   │   └── iot.db                # Banco SQLite
+│   ├── simulator/                 # IoT Simulation
+│   │   ├── sensor_simulator.py    # Data generator
+│   │   ├── subscriber.py          # MQTT consumer
+│   │   └── iot.db                # SQLite database
 │   ├── api/
-│   │   └── IoTDataApi/           # API REST .NET
+│   │   └── IoTDataApi/           # .NET REST API
 │   │       ├── Controllers/
 │   │       ├── Data/
 │   │       └── Program.cs
 │   └── client/
-│       └── iot-dashboard/        # Frontend React
+│       └── iot-dashboard/        # React Frontend
 │           ├── src/
 │           └── public/
-├── README.md                     # Este arquivo
+├── README.md                     # This file
 └── .gitignore
 ```
 
-## Endpoints da API
+## API Endpoints
 
 ### Base URL: `http://localhost:5000`
 
-| Método | Endpoint | Descrição |
+| Method | Endpoint | Description |
 |--------|----------|-----------|
-| GET | `/api/iot` | Todos os dados (últimos 100) |
-| GET | `/api/iot/machine/{id}` | Dados de máquina específica |
+| GET | `/api/iot` | All data (last 100 records) |
+| GET | `/api/iot/machine/{id}` | Specific machine data |
 
-### Exemplo de Response
+### Example Response
 ```json
 {
   "id": 769,
@@ -145,91 +145,91 @@ ManutencaoPreditiva/
 }
 ```
 
-## 🖥️ Interface do Dashboard
+## 🖥️ Dashboard Interface
 
-### Funcionalidades
-- ✅ **Monitoramento em Tempo Real** - Atualização a cada 5 segundos
-- ✅ **Sistema de Alertas Visuais** - Cores baseadas em thresholds
-- ✅ **Layout Responsivo** - Mobile, tablet e desktop
-- ✅ **Estados de Loading/Error** - UX aprimorada
-- ✅ **Informações Completas** - Todos os sensores visíveis
+### Features
+- ✅ **Real-time Monitoring** - Updates every 5 seconds
+- ✅ **Visual Alert System** - Color-coded thresholds
+- ✅ **Responsive Layout** - Mobile, tablet and desktop
+- ✅ **Loading/Error States** - Enhanced UX
+- ✅ **Complete Information** - All sensors visible
 
-### Status das Máquinas
-- 🟢 **NORMAL** - Todos os parâmetros dentro do esperado
-- 🟡 **ALERTA** - Um ou mais parâmetros em zona de atenção
-- 🔴 **CRÍTICO** - Parâmetros acima dos thresholds seguros
+### Machine Status
+- 🟢 **NORMAL** - All parameters within expected range
+- 🟡 **ALERT** - One or more parameters in attention zone
+- 🔴 **CRITICAL** - Parameters above safe thresholds
 
-## 🔍 Monitoramento e Logs
+## 🔍 Monitoring and Logs
 
-### Verificar Status dos Serviços
+### Check Service Status
 ```bash
 # MQTT Broker
 sudo systemctl status mosquitto
 
-# Dados no banco
+# Database data
 sqlite3 src/simulator/iot.db "SELECT COUNT(*) FROM iot_data;"
 
-# API funcionando
+# API status
 curl http://localhost:5000/api/iot/machine/M1
 
 # Frontend
-# Acessar http://localhost:8080
+# Access http://localhost:8080
 ```
 
-### Logs Importantes
-- **Simulator:** Conexão MQTT e publicação de dados
-- **Subscriber:** Recebimento e armazenamento no banco
-- **API:** Requests e conexão com banco
-- **Frontend:** Console do navegador (F12)
+### Important Logs
+- **Simulator:** MQTT connection and data publishing
+- **Subscriber:** Data reception and database storage
+- **API:** Requests and database connection
+- **Frontend:** Browser console (F12)
 
-##  Troubleshooting
+## Troubleshooting
 
-### Problema: Tela em branco no frontend
-**Soluções:**
-1. Verificar se API está rodando (porta 5000)
-2. Verificar CORS na API
-3. Abrir console do navegador (F12) para erros
+### Issue: Blank frontend screen
+**Solutions:**
+1. Check if API is running (port 5000)
+2. Check CORS in API
+3. Open browser console (F12) for errors
 
-### Problema: "Aguardando dados..." nos cards
-**Soluções:**
-1. Verificar se simulador está rodando
-2. Confirmar dados no SQLite
-3. Testar API diretamente
+### Issue: "Waiting for data..." in cards
+**Solutions:**
+1. Check if simulator is running
+2. Confirm data in SQLite
+3. Test API directly
 
-### Problema: Erro de conexão MQTT
-**Soluções:**
+### Issue: MQTT connection error
+**Solutions:**
 ```bash
 sudo systemctl restart mosquitto
 mosquitto_pub -h localhost -t "test" -m "hello"
 ```
 
-### Problema: API não encontra banco
-**Soluções:**
-1. Executar subscriber.py primeiro
-2. Verificar caminho do banco no Program.cs
-3. Verificar permissões de arquivo
+### Issue: API cannot find database
+**Solutions:**
+1. Run subscriber.py first
+2. Check database path in Program.cs
+3. Check file permissions
 
-## Próximos Passos
+## Next Steps
 
-### Funcionalidades Planejadas
-- [ ] **Histórico de Dados** - Gráficos temporais
-- [ ] **Alertas por Email** - Notificações automáticas
-- [ ] **Machine Learning** - Predição de falhas
-- [ ] **Relatórios** - Exportação de dados
-- [ ] **Autenticação** - Login de usuários
-- [ ] **Multi-tenancy** - Suporte a múltiplas plantas
+### Planned Features
+- [ ] **Data History** - Time series charts
+- [ ] **Email Alerts** - Automatic notifications
+- [ ] **Machine Learning** - Failure prediction
+- [ ] **Reports** - Data export
+- [ ] **Authentication** - User login
+- [ ] **Multi-tenancy** - Multiple plants support
 
-### Melhorias Técnicas
-- [ ] **Docker** - Containerização completa
-- [ ] **CI/CD** - Pipeline automatizado
-- [ ] **Testes** - Cobertura de testes
-- [ ] **Monitoring** - APM e observabilidade
-- [ ] **Scaling** - Suporte a mais máquinas
+### Technical Improvements
+- [ ] **Docker** - Complete containerization
+- [ ] **CI/CD** - Automated pipeline
+- [ ] **Testing** - Test coverage
+- [ ] **Monitoring** - APM and observability
+- [ ] **Scaling** - Support for more machines
 
-## Contribuição
+## Contribution
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
