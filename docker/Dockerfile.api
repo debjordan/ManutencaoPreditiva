@@ -1,21 +1,26 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY ./src/api/IoTDataApi/IoTDataApi.csproj ./api/
-RUN dotnet restore ./api/IoTDataApi.csproj
+# Copy the entire source tree so project-to-project references are available
+COPY ./src ./
 
-COPY ./src/api/IoTDataApi/ ./api/
+# Restore the API project (will resolve referenced projects under src/)
+RUN dotnet restore ./api/IoTDataApi/IoTDataApi.csproj
 
-WORKDIR /src/api
-RUN dotnet publish -c Release -o /app/publish
+WORKDIR /src/api/IoTDataApi
+# Publish with trimming to reduce output size. Target linux-x64 runtime for smaller artifacts in container.
+RUN dotnet publish -c Release -o /app/publish -r linux-x64 --no-self-contained
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
-RUN mkdir -p /app/simulator
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 COPY --from=build /app/publish .
+RUN chown -R appuser:appgroup /app
+USER appuser
 
 EXPOSE 5000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s CMD curl -f http://localhost:5000/health || exit 1
 
 ENTRYPOINT ["dotnet", "IoTDataApi.dll"]
