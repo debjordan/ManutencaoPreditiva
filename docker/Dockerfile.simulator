@@ -1,16 +1,21 @@
 FROM python:3.12-slim
-
 WORKDIR /app
 
-COPY src/simulator/sensor_simulator.py .
-COPY src/simulator/subscriber.py .
+# create non-root user
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-RUN pip install --no-cache-dir paho-mqtt
+# copy simulator sources
+COPY src/simulator/ .
 
-ARG CMD="sensor_simulator.py"
-ENV CMD=${CMD}
+# install requirements if present
+COPY src/simulator/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt || pip install --no-cache-dir paho-mqtt
 
 ENV MQTT_HOST=mosquitto
 ENV MQTT_PORT=1883
+
+USER appuser
+ARG CMD="sensor_simulator.py"
+ENV CMD=${CMD}
 
 CMD ["sh", "-c", "python $CMD"]
