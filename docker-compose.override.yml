@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  seeder:
+    image: python:3.12-slim
+    container_name: mp_seeder
+    depends_on:
+      - mosquitto
+    networks:
+      - mp_net
+    volumes:
+      - ./docker/seed_publisher.py:/seed_publisher.py:ro
+    entrypoint: ["sh", "-c", "pip install --no-cache-dir paho-mqtt && python /seed_publisher.py"]
+
+  simulator:
+    volumes:
+      - ./src/simulator:/app
+      - ./docker/simulator:/app/data
+    command: ["sh", "-c", "python sensor_simulator.py"]
+  api:
+    volumes:
+      - ./docker/simulator:/app/data:ro
+
+volumes:
+  simulator_data:
+
+networks:
+  mp_net:
+    external: false
