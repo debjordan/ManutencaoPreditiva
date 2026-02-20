@@ -1,235 +1,117 @@
-# IoT System - Predictive Maintenance
+**Manutenção Preditiva (IoT)**
 
-Complete IoT monitoring system for predictive maintenance of industrial machinery, featuring sensor simulator, REST API, and real-time web dashboard.
+Uma solução completa para monitoramento de máquinas industriais voltada a manutenção preditiva. Inclui:
 
-![Dashboard Preview](https://via.placeholder.com/800x400?text=IoT+Dashboard+Preview)
+- Simulador de sensores (MQTT)
+- Subscriber que persiste dados em SQLite
+- API REST em ASP.NET Core para consulta e integração
+- Dashboard web em React/TypeScript para visualização em tempo real
 
-## Overview
+![](https://via.placeholder.com/1000x400?text=IoT+Dashboard+Preview)
 
-The system simulates industrial machines with sensors that send data via MQTT. A REST API provides access to data stored in SQLite, and a web dashboard displays real-time information with threshold-based alert system.
+Por que comercializar?
+- Produto focado em fábricas pequenas e médias que querem reduzir downtime e custos com manutenção.
+- Arquitetura simples para deploy on-premises ou em nuvem, com integração por API e MQTT.
 
-## Architecture
+Badges
+- Build (GitHub Actions): ![CI](https://github.com/<OWNER>/<REPO>/actions/workflows/ci.yml/badge.svg)
+- Release (on tags): ![Release](https://github.com/<OWNER>/<REPO>/actions/workflows/release.yml/badge.svg)
+- License: ![License](https://img.shields.io/badge/license-MIT-green)
+- Docker: ![Docker Compose](https://img.shields.io/badge/docker-compose-ready-brightgreen)
 
-```mermaid
-graph TD
-    A[Sensor Simulator] -->|MQTT| B[MQTT Broker]
-    B --> C[Subscriber]
-    C --> D[SQLite Database]
-    D --> E[REST API]
-    E --> F[React Dashboard]
-```
+Screenshots
+- Demo dashboard: ![Demo](https://via.placeholder.com/1000x400?text=Demo+Dashboard)
 
-## 🔧 Technologies
 
-### Backend
-- **Python** - Sensor simulation and data collection
-- **MQTT** - IoT communication
-- **SQLite** - Local storage
-- **ASP.NET Core** - REST API
-- **Entity Framework** - ORM
+Principais recursos
+- Monitoramento em tempo real com alertas por thresholds
+- Painel responsivo e exportável
+- Fácil integração via API REST
+- Simulador para demonstrações e POC
 
-### Frontend
-- **React 18** - User interface
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Webpack** - Build system
+Rápido start (resumido)
 
-## Monitored Data
+1. Clonar
 
-| Sensor | Range | Normal | Alert | Critical |
-|--------|-------|--------|--------|---------|
-| **Vibration** | 8.0-15.0 | ≤ 10.0 | 10.1-12.0 | > 12.0 |
-| **Temperature** | 45-70°C | ≤ 55°C | 55.1-60°C | > 60°C |
-| **Pressure** | 4.0-6.0 bar | ≤ 5.0 | 5.1-5.5 | > 5.5 |
-| **Humidity** | 30-80% | - | - | - |
-| **Voltage** | 220-240V | - | - | - |
-| **Current** | 5-20A | - | - | - |
-| **Power** | 1-5kW | - | - | - |
-
-## Quick Start
-
-### Prerequisites
-
-```bash
-# Python 3.8+
-python --version
-
-# .NET 8.0+
-dotnet --version
-
-# Node.js 18+
-node --version
-
-# MQTT Broker (Ubuntu/Debian)
-sudo apt install mosquitto mosquitto-clients
-sudo systemctl start mosquitto
-```
-
-### 1. Clone Repository
 ```bash
 git clone <repository-url>
 cd ManutencaoPreditiva
 ```
 
-### 2. Start Simulator
-```bash
-# Terminal 1 - Subscriber
-cd src/simulator
-pip install paho-mqtt
-python subscriber.py
+2. Dependências principais
 
-# Terminal 2 - Sensor Simulator
+```bash
+# .NET
+dotnet --version
+
+# Node
+node --version
+
+# Python (simulador)
+python --version
+```
+
+3. Executar local (modo rápido)
+
+Terminal 1 — Subscriber (grava dados)
+
+```bash
+cd src/simulator
+pip install -r requirements.txt || pip install paho-mqtt
+python subscriber.py
+```
+
+Terminal 2 — Simulador
+
+```bash
 cd src/simulator
 python sensor_simulator.py
 ```
 
-### 3. Start API
+Terminal 3 — API
+
 ```bash
-# Terminal 3
 cd src/api/IoTDataApi
 dotnet restore
-dotnet run
+dotnet run --urls=http://localhost:5000
 ```
 
-### 4. Start Frontend
+Terminal 4 — Frontend
+
 ```bash
-# Terminal 4
 cd src/client/iot-dashboard
-npm install
+npm ci
 npm start
 ```
 
-### 5. Access Dashboard
-```
-http://localhost:8080
-```
+Abra: http://localhost:8080
 
-## Project Structure
+Estrutura do repositório
 
 ```
 ManutencaoPreditiva/
 ├── src/
-│   ├── simulator/                 # IoT Simulation
-│   │   ├── sensor_simulator.py    # Data generator
-│   │   ├── subscriber.py          # MQTT consumer
-│   │   └── iot.db                # SQLite database
-│   ├── api/
-│   │   └── IoTDataApi/           # .NET REST API
-│   │       ├── Controllers/
-│   │       ├── Data/
-│   │       └── Program.cs
-│   └── client/
-│       └── iot-dashboard/        # React Frontend
-│           ├── src/
-│           └── public/
-├── README.md                     # This file
-└── .gitignore
+│   ├── simulator/                 # Simulador MQTT e subscriber
+│   ├── api/                       # ASP.NET Core API
+│   └── client/                    # React dashboard
+├── docker/                        # Dockerfiles e configs
+├── .github/workflows/ci.yml       # Pipeline CI
+├── CONTRIBUTING.md                # Como contribuir
+└── LICENSE
 ```
 
-## API Endpoints
+Próximos passos para profissionalização
 
-### Base URL: `http://localhost:5000`
+- Completar pipeline de CI/CD (build -> images -> release)
+- Docker Compose para demo e POC
+- Adicionar testes automatizados e cobertura
+- Criar documentação técnica e comercial (one-pager e screenshots)
+- Preparar kit de demonstração com dados sintéticos e guia de venda
 
-| Method | Endpoint | Description |
-|--------|----------|-----------|
-| GET | `/api/iot` | All data (last 100 records) |
-| GET | `/api/iot/machine/{id}` | Specific machine data |
+Contato comercial
 
-### Example Response
-```json
-{
-  "id": 769,
-  "topic": "sensors/M1/data",
-  "message": "{\"machine_id\":\"M1\",\"vibration\":10.25,...}",
-  "receivedAt": "2025-08-19T19:58:30.804525Z"
-}
-```
+Abrir uma issue com etiqueta `commercial` ou enviar email para contato@example.com
 
-## 🖥️ Dashboard Interface
+----
 
-### Features
-- ✅ **Real-time Monitoring** - Updates every 5 seconds
-- ✅ **Visual Alert System** - Color-coded thresholds
-- ✅ **Responsive Layout** - Mobile, tablet and desktop
-- ✅ **Loading/Error States** - Enhanced UX
-- ✅ **Complete Information** - All sensors visible
-
-### Machine Status
-- 🟢 **NORMAL** - All parameters within expected range
-- 🟡 **ALERT** - One or more parameters in attention zone
-- 🔴 **CRITICAL** - Parameters above safe thresholds
-
-## 🔍 Monitoring and Logs
-
-### Check Service Status
-```bash
-# MQTT Broker
-sudo systemctl status mosquitto
-
-# Database data
-sqlite3 src/simulator/iot.db "SELECT COUNT(*) FROM iot_data;"
-
-# API status
-curl http://localhost:5000/api/iot/machine/M1
-
-# Frontend
-# Access http://localhost:8080
-```
-
-### Important Logs
-- **Simulator:** MQTT connection and data publishing
-- **Subscriber:** Data reception and database storage
-- **API:** Requests and database connection
-- **Frontend:** Browser console (F12)
-
-## Troubleshooting
-
-### Issue: Blank frontend screen
-**Solutions:**
-1. Check if API is running (port 5000)
-2. Check CORS in API
-3. Open browser console (F12) for errors
-
-### Issue: "Waiting for data..." in cards
-**Solutions:**
-1. Check if simulator is running
-2. Confirm data in SQLite
-3. Test API directly
-
-### Issue: MQTT connection error
-**Solutions:**
-```bash
-sudo systemctl restart mosquitto
-mosquitto_pub -h localhost -t "test" -m "hello"
-```
-
-### Issue: API cannot find database
-**Solutions:**
-1. Run subscriber.py first
-2. Check database path in Program.cs
-3. Check file permissions
-
-## Next Steps
-
-### Planned Features
-- [ ] **Data History** - Time series charts
-- [ ] **Email Alerts** - Automatic notifications
-- [ ] **Machine Learning** - Failure prediction
-- [ ] **Reports** - Data export
-- [ ] **Authentication** - User login
-- [ ] **Multi-tenancy** - Multiple plants support
-
-### Technical Improvements
-- [ ] **Docker** - Complete containerization
-- [ ] **CI/CD** - Automated pipeline
-- [ ] **Testing** - Test coverage
-- [ ] **Monitoring** - APM and observability
-- [ ] **Scaling** - Support for more machines
-
-## Contribution
-
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Se quiser, posso começar agora adicionando: `docker-compose` para demo, scripts de build e um roteiro de POC comercial. Indique quais itens priorizar.
