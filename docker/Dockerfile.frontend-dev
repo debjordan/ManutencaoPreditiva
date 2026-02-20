@@ -1,15 +1,17 @@
 FROM node:18-alpine
-
 WORKDIR /app
 
+# Development image for frontend with hot-reload
+ENV NODE_ENV=development
+
+# install deps first to leverage cache
 COPY src/client/iot-dashboard/package*.json ./
+RUN npm ci --silent
 
-RUN npm ci
+# copy sources; in dev we will mount local files to enable live reload
+COPY src/client/iot-dashboard/ ./
 
-COPY src/client/iot-dashboard/ .
+EXPOSE 3000 8080
 
-WORKDIR /app/src/client/iot-dashboard
-
-EXPOSE 8080
-
+# default command runs the project's dev server
 CMD ["npm", "run", "dev"]
