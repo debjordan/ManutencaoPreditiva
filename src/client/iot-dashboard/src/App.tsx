@@ -20,7 +20,7 @@ const App: React.FC = () => {
 
       for (const machine of machines) {
         try {
-          const response = await fetch(`http://localhost:5000/api/iot/machine/${machine}`);
+          const response = await fetch(`http://localhost:5002/api/iot/machine/${machine}`);
           if (response.ok) {
             const machineData = await response.json();
             newData[machine] = machineData;
