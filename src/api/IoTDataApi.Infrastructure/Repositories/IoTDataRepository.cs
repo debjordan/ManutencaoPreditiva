@@ -16,18 +16,35 @@ public class IoTDataRepository : IIoTDataRepository
 
     public async Task<IEnumerable<IoTData>> GetAllAsync()
     {
-        return await _context.IoTData
-            .OrderByDescending(d => d.ReceivedAt)
-            .Take(100)
-            .ToListAsync();
+        try
+        {
+            return await _context.IoTData
+                .OrderByDescending(d => d.ReceivedAt)
+                .Take(100)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log and return empty list to avoid 500 when DB is temporarily unavailable
+            Console.Error.WriteLine($"IoTDataRepository.GetAllAsync error: {ex.Message}");
+            return Enumerable.Empty<IoTData>();
+        }
     }
 
     public async Task<IEnumerable<IoTData>> GetByMachineIdAsync(string machineId)
     {
-        return await _context.IoTData
-            .Where(d => d.Topic.Contains(machineId))
-            .OrderByDescending(d => d.ReceivedAt)
-            .Take(100)
-            .ToListAsync();
+        try
+        {
+            return await _context.IoTData
+                .Where(d => d.Topic.Contains(machineId))
+                .OrderByDescending(d => d.ReceivedAt)
+                .Take(100)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"IoTDataRepository.GetByMachineIdAsync error: {ex.Message}");
+            return Enumerable.Empty<IoTData>();
+        }
     }
 }
