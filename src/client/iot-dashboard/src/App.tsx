@@ -1,108 +1,207 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import AlertPanel from './components/AlertPanel';
 import MachineCard from './components/MachineCard';
 
-interface SensorData {
+declare const process: { env: { API_BASE_URL: string } };
+const API_BASE = process.env.API_BASE_URL;
+
+export interface SensorData {
   id: number;
   topic: string;
   message: string;
   receivedAt: string;
 }
 
+export interface MachineStats {
+  machineId: string;
+  machineName: string;
+  area: string;
+  currentState: string;
+  recordCount: number;
+  riskScore: number;
+  oee: number;
+  lastSeen: string;
+  vibration:   { min: number; max: number; avg: number; last: number };
+  temperature: { min: number; max: number; avg: number; last: number };
+  pressure:    { min: number; max: number; avg: number; last: number };
+  humidity:    { min: number; max: number; avg: number; last: number };
+  voltage:     { min: number; max: number; avg: number; last: number };
+  current:     { min: number; max: number; avg: number; last: number };
+  power:       { min: number; max: number; avg: number; last: number };
+}
+
+export interface Alert {
+  machineId: string;
+  machineName: string;
+  area: string;
+  severity: string;
+  sensor: string;
+  value: number;
+  threshold: number;
+  message: string;
+  detectedAt: string;
+}
+
+const MACHINES = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
+
 const App: React.FC = () => {
-  const [data, setData] = useState<Record<string, SensorData[]>>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [rawData,  setRawData]  = useState<Record<string, SensorData[]>>({});
+  const [stats,    setStats]    = useState<Record<string, MachineStats>>({});
+  const [alerts,   setAlerts]   = useState<Alert[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState<string | null>(null);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
-  const fetchData = async () => {
+  const fetchAll = useCallback(async () => {
     try {
-      const machines = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9'];
-      const newData: Record<string, SensorData[]> = {};
+      const [statsList, alertsList, ...machineResponses] = await Promise.all([
+        fetch(`${API_BASE}/api/iot/stats`).then(r => r.json() as Promise<MachineStats[]>),
+        fetch(`${API_BASE}/api/iot/alerts`).then(r => r.json() as Promise<Alert[]>),
+        ...MACHINES.map(m =>
+          fetch(`${API_BASE}/api/iot/machine/${m}`)
+            .then(r => r.ok ? r.json() as Promise<SensorData[]> : Promise.resolve([]))
+            .catch(() => [] as SensorData[])
+        ),
+      ]);
 
-      for (const machine of machines) {
-        try {
-          const response = await fetch(`http://localhost:5002/api/iot/machine/${machine}`);
-          if (response.ok) {
-            const machineData = await response.json();
-            newData[machine] = machineData;
-          } else {
-            console.warn(`Failed to fetch data for ${machine}: ${response.status}`);
-            newData[machine] = [];
-          }
-        } catch (err) {
-          console.error(`Error fetching data for ${machine}:`, err);
-          newData[machine] = [];
-        }
-      }
+      const newRaw: Record<string, SensorData[]> = {};
+      MACHINES.forEach((m, i) => { newRaw[m] = machineResponses[i] ?? []; });
 
-      setData(newData);
+      const statsMap: Record<string, MachineStats> = {};
+      (statsList as MachineStats[]).forEach(s => { statsMap[s.machineId] = s; });
+
+      setRawData(newRaw);
+      setStats(statsMap);
+      setAlerts(alertsList as Alert[]);
       setError(null);
+      setLastSync(new Date());
     } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Erro ao carregar dados das máquinas');
+      console.error('Erro ao buscar dados:', err);
+      setError('Falha na comunicação com a API. Verifique se o backend está no ar.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
+    fetchAll();
+    const interval = setInterval(fetchAll, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchAll]);
+
+  const criticalCount = alerts.filter(a => a.severity === 'CRÍTICO').length;
+  const alertCount    = alerts.filter(a => a.severity === 'ALERTA').length;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Carregando dados das máquinas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-4">⚠️</div>
-          <p className="text-lg text-red-600">{error}</p>
-          <button
-            onClick={fetchData}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Tentar Novamente
-          </button>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4" />
+          <p className="text-gray-300 text-lg">Conectando ao chão de fábrica...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Dashboard IoT - Manutenção Preditiva
-        </h1>
+    <div className="min-h-screen bg-gray-950 text-gray-100">
+      {/* Header */}
+      <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+        <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              ⚙️ Manutenção Preditiva — Industry 4.0
+            </h1>
+            <p className="text-sm text-gray-400 mt-0.5">
+              Monitoramento Industrial em Tempo Real
+            </p>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap">
+            {criticalCount > 0 && (
+              <span className="px-3 py-1 rounded-full bg-red-600 text-white text-sm font-semibold animate-pulse">
+                🚨 {criticalCount} CRÍTICO{criticalCount > 1 ? 'S' : ''}
+              </span>
+            )}
+            {alertCount > 0 && (
+              <span className="px-3 py-1 rounded-full bg-yellow-500 text-gray-900 text-sm font-semibold">
+                ⚠️ {alertCount} ALERTA{alertCount > 1 ? 'S' : ''}
+              </span>
+            )}
+            {criticalCount === 0 && alertCount === 0 && (
+              <span className="px-3 py-1 rounded-full bg-green-700 text-white text-sm font-semibold">
+                ✅ Todas as máquinas normais
+              </span>
+            )}
+            <span className="text-xs text-gray-500">
+              Atualizado: {lastSync?.toLocaleTimeString('pt-BR') ?? '--:--:--'}
+            </span>
+            <button
+              onClick={fetchAll}
+              className="px-3 py-1 rounded bg-blue-700 hover:bg-blue-600 text-white text-sm transition"
+            >
+              ↺ Atualizar
+            </button>
+          </div>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Object.entries(data).map(([machineId, machineData]) => (
+      <main className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
+        {/* Factory KPIs */}
+        <FactoryKpis stats={Object.values(stats)} alerts={alerts} />
+
+        {/* Alert panel */}
+        {alerts.length > 0 && <AlertPanel alerts={alerts} />}
+
+        {/* Error banner */}
+        {error && (
+          <div className="bg-red-900/40 border border-red-700 rounded-lg px-4 py-3 text-red-300">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Machine grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {MACHINES.map(machineId => (
             <MachineCard
               key={machineId}
               machineId={machineId}
-              data={machineData}
+              data={rawData[machineId] ?? []}
+              stats={stats[machineId] ?? null}
             />
           ))}
         </div>
+      </main>
+    </div>
+  );
+};
 
-        {Object.keys(data).length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-lg text-gray-600">
-              Nenhum dado disponível. Verifique se o simulador e a API estão rodando.
-            </p>
-          </div>
-        )}
-      </div>
+// Factory-level KPI bar
+interface FactoryKpisProps { stats: MachineStats[]; alerts: Alert[]; }
+
+const FactoryKpis: React.FC<FactoryKpisProps> = ({ stats, alerts }) => {
+  const online    = stats.length;
+  const avgOee    = online > 0 ? (stats.reduce((s, m) => s + m.oee,       0) / online).toFixed(1) : '—';
+  const avgRisk   = online > 0 ? (stats.reduce((s, m) => s + m.riskScore, 0) / online).toFixed(1) : '—';
+  const critical  = stats.filter(m => m.currentState === 'critical').length;
+  const degrading = stats.filter(m => m.currentState === 'degrading').length;
+
+  const kpis = [
+    { label: 'Máquinas on-line',  value: `${online} / 6`,      color: 'text-blue-400' },
+    { label: 'OEE Médio',         value: `${avgOee}%`,          color: Number(avgOee)  >= 85 ? 'text-green-400' : 'text-yellow-400' },
+    { label: 'Risco Médio',       value: `${avgRisk}%`,         color: Number(avgRisk) > 60  ? 'text-red-400'   : Number(avgRisk) > 40 ? 'text-yellow-400' : 'text-green-400' },
+    { label: 'Em Estado Crítico', value: String(critical),      color: critical  > 0 ? 'text-red-400'    : 'text-green-400' },
+    { label: 'Em Degradação',     value: String(degrading),     color: degrading > 0 ? 'text-yellow-400' : 'text-green-400' },
+    { label: 'Alertas Ativos',    value: String(alerts.length), color: alerts.length > 0 ? 'text-yellow-400' : 'text-green-400' },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {kpis.map(k => (
+        <div key={k.label} className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-center">
+          <p className={`text-2xl font-bold ${k.color}`}>{k.value}</p>
+          <p className="text-xs text-gray-500 mt-1">{k.label}</p>
+        </div>
+      ))}
     </div>
   );
 };
