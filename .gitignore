@@ -128,3 +128,5 @@ logs/
 *.secrets
 *.bak
 .venv/
+# Frontend build outputs
+src/client/iot-dashboard/dist/
