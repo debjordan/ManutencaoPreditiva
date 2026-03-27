@@ -35,8 +35,10 @@ public class IoTDataRepository : IIoTDataRepository
     {
         try
         {
+            // Exact topic match prevents M1 from matching M10, M11, etc.
+            var topic = $"sensors/{machineId}/data";
             return await _context.IoTData
-                .Where(d => d.Topic.Contains(machineId))
+                .Where(d => d.Topic == topic)
                 .OrderByDescending(d => d.ReceivedAt)
                 .Take(100)
                 .ToListAsync();
