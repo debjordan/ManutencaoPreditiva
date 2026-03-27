@@ -17,9 +17,38 @@ services:
       - ./src/simulator:/app
       - ./docker/simulator:/app/data
     command: ["sh", "-c", "python sensor_simulator.py"]
-  api:
+
+  subscriber:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.simulator
+    container_name: mp_subscriber
+    environment:
+      - CMD=subscriber.py
+    user: "0:0"
+    depends_on:
+      - mosquitto
     volumes:
-      - ./docker/simulator:/app/data:ro
+      - ./src/simulator:/app
+      - ./docker/simulator:/app/data
+    networks:
+      - mp_net
+
+  api:
+    environment:
+      - DOTNET_RUNNING_IN_CONTAINER=true
+    # Override Dockerfile healthcheck: aspnet:8.0 slim image has no curl.
+    # wget is equally absent; the simplest fix for dev is /bin/sh TCP check.
+    healthcheck:
+      test: ["CMD-SHELL", "cat /proc/1/status | grep -q VmRSS && echo ok || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    volumes:
+      # DB is written by subscriber to ./docker/simulator/iot.db;
+      # API reads it at /app/simulator/iot.db (path expected by Program.cs)
+      - ./docker/simulator:/app/simulator:ro
 
 volumes:
   simulator_data:
