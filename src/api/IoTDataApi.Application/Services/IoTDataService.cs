@@ -1,16 +1,17 @@
-using System.Text.Json;
 using IoTDataApi.Application.DTOs;
+using IoTDataApi.Application.Interfaces;
+using IoTDataApi.Application.Parsers;
 using IoTDataApi.Domain.Entities;
 using IoTDataApi.Domain.Interfaces;
-using IoTDataApi.Application.Interfaces;
 
 namespace IoTDataApi.Application.Services;
 
-public class IoTDataService : IIoTDataService
+/// <summary>
+/// Responsabilidade: consultas de dados brutos, estatísticas agregadas e alertas ativos.
+/// RUL, tendências e downtime vivem em serviços dedicados (SRP).
+/// </summary>
+public sealed class IoTDataService : IIoTDataService
 {
-    private readonly IIoTDataRepository _repository;
-
-    // (warning, critical) thresholds per sensor
     private static readonly Dictionary<string, (double Warning, double Critical)> Thresholds = new()
     {
         ["vibration"]   = (10.0, 12.0),
@@ -19,6 +20,8 @@ public class IoTDataService : IIoTDataService
         ["humidity"]    = (70.0, 80.0),
         ["current"]     = (18.0, 21.0),
     };
+
+    private readonly IIoTDataRepository _repository;
 
     public IoTDataService(IIoTDataRepository repository)
     {
@@ -33,41 +36,41 @@ public class IoTDataService : IIoTDataService
 
     public async Task<IEnumerable<SensorReadingDto>> GetMachineReadingsAsync(string machineId, int limit = 100)
     {
-        var records = await _repository.GetByMachineIdAsync(machineId);
-        return records.Take(limit).Select(ParseReading).OfType<SensorReadingDto>();
+        var records = await _repository.GetByMachineIdAsync(machineId, limit);
+        return records.Select(SensorParser.Parse).OfType<SensorReadingDto>();
     }
 
     public async Task<IEnumerable<MachineStatsDto>> GetAllMachineStatsAsync()
     {
-        var all = await _repository.GetAllAsync();
-        return all
-            .Select(ParseReading)
+        var records = await _repository.GetAllAsync();
+        return records
+            .Select(SensorParser.Parse)
             .OfType<SensorReadingDto>()
-            .GroupBy(r => r.MachineId)
-            .Select(g => BuildStats(g.Key, g.ToList()));
+            .GroupBy(reading => reading.MachineId)
+            .Select(group => BuildStats(group.Key, group.ToList()));
     }
 
     public async Task<MachineStatsDto?> GetMachineStatsAsync(string machineId)
     {
-        var records = await _repository.GetByMachineIdAsync(machineId);
-        var readings = records.Select(ParseReading).OfType<SensorReadingDto>().ToList();
+        var records  = await _repository.GetByMachineIdAsync(machineId);
+        var readings = records.Select(SensorParser.Parse).OfType<SensorReadingDto>().ToList();
         return readings.Count == 0 ? null : BuildStats(machineId, readings);
     }
 
     public async Task<IEnumerable<AlertDto>> GetActiveAlertsAsync()
     {
-        var all = await _repository.GetAllAsync();
-        var alerts = new List<AlertDto>();
+        var records  = await _repository.GetAllAsync();
+        var alerts   = new List<AlertDto>();
 
-        var groups = all
-            .Select(ParseReading)
+        var latestPerMachine = records
+            .Select(SensorParser.Parse)
             .OfType<SensorReadingDto>()
-            .GroupBy(r => r.MachineId);
+            .GroupBy(reading => reading.MachineId)
+            .Select(group => group.MaxBy(reading => reading.Timestamp))
+            .OfType<SensorReadingDto>();
 
-        foreach (var group in groups)
+        foreach (var latest in latestPerMachine)
         {
-            var latest = group.MaxBy(r => r.Timestamp);
-            if (latest is null) continue;
             CheckThreshold(alerts, latest, "vibration",   latest.Vibration);
             CheckThreshold(alerts, latest, "temperature", latest.Temperature);
             CheckThreshold(alerts, latest, "pressure",    latest.Pressure);
@@ -75,68 +78,17 @@ public class IoTDataService : IIoTDataService
             CheckThreshold(alerts, latest, "current",     latest.Current);
         }
 
-        return alerts.OrderByDescending(a => a.Severity);
+        return alerts.OrderByDescending(alert => alert.Severity);
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────────
-
-    private static void CheckThreshold(List<AlertDto> alerts, SensorReadingDto r,
-                                       string sensor, double value)
-    {
-        if (!Thresholds.TryGetValue(sensor, out var t)) return;
-
-        if (value >= t.Critical)
-            alerts.Add(new AlertDto
-            {
-                MachineId   = r.MachineId,
-                MachineName = r.MachineName,
-                Area        = r.Area,
-                Severity    = "CRÍTICO",
-                Sensor      = sensor,
-                Value       = value,
-                Threshold   = t.Critical,
-                Message     = $"{sensor} em {value:F2} — acima do limite crítico ({t.Critical})",
-                DetectedAt  = r.ReceivedAt,
-            });
-        else if (value >= t.Warning)
-            alerts.Add(new AlertDto
-            {
-                MachineId   = r.MachineId,
-                MachineName = r.MachineName,
-                Area        = r.Area,
-                Severity    = "ALERTA",
-                Sensor      = sensor,
-                Value       = value,
-                Threshold   = t.Warning,
-                Message     = $"{sensor} em {value:F2} — atenção, acima de {t.Warning}",
-                DetectedAt  = r.ReceivedAt,
-            });
-    }
+    // ── private builders ──────────────────────────────────────────────────────
 
     private static MachineStatsDto BuildStats(string machineId, List<SensorReadingDto> readings)
     {
-        var latest = readings.MaxBy(r => r.Timestamp)!;
+        var latest = readings.MaxBy(reading => reading.Timestamp)!;
 
-        double CalcRisk()
-        {
-            var vibRisk  = Math.Min(latest.Vibration  / 15.0 * 100, 100);
-            var tempRisk = Math.Min(latest.Temperature / 70.0 * 100, 100);
-            var presRisk = Math.Min(latest.Pressure   / 6.0  * 100, 100);
-            return Math.Round((vibRisk + tempRisk + presRisk) / 3.0, 1);
-        }
-
-        double CalcOee()
-        {
-            double availability = latest.State switch
-            {
-                "critical"  => 60.0,
-                "degrading" => 82.0,
-                _           => 97.0,
-            };
-            double performance = Math.Max(0, Math.Min(100, (1.0 - latest.Vibration  / 20.0) * 100));
-            double quality     = Math.Max(0, Math.Min(100, (1.0 - latest.Temperature / 80.0) * 100));
-            return Math.Round(availability * performance * quality / 10000.0, 1);
-        }
+        double riskScore = CalculateRiskScore(latest);
+        double oee       = CalculateOee(latest);
 
         return new MachineStatsDto
         {
@@ -145,20 +97,41 @@ public class IoTDataService : IIoTDataService
             Area         = latest.Area,
             CurrentState = latest.State,
             RecordCount  = readings.Count,
-            RiskScore    = CalcRisk(),
-            Oee          = CalcOee(),
+            RiskScore    = riskScore,
+            Oee          = oee,
             LastSeen     = latest.ReceivedAt,
-            Vibration    = Stat(readings.Select(r => r.Vibration)),
-            Temperature  = Stat(readings.Select(r => r.Temperature)),
-            Pressure     = Stat(readings.Select(r => r.Pressure)),
-            Humidity     = Stat(readings.Select(r => r.Humidity)),
-            Voltage      = Stat(readings.Select(r => r.Voltage)),
-            Current      = Stat(readings.Select(r => r.Current)),
-            Power        = Stat(readings.Select(r => r.Power)),
+            Vibration    = AggregateStats(readings.Select(r => r.Vibration)),
+            Temperature  = AggregateStats(readings.Select(r => r.Temperature)),
+            Pressure     = AggregateStats(readings.Select(r => r.Pressure)),
+            Humidity     = AggregateStats(readings.Select(r => r.Humidity)),
+            Voltage      = AggregateStats(readings.Select(r => r.Voltage)),
+            Current      = AggregateStats(readings.Select(r => r.Current)),
+            Power        = AggregateStats(readings.Select(r => r.Power)),
         };
     }
 
-    private static SensorStats Stat(IEnumerable<double> values)
+    private static double CalculateRiskScore(SensorReadingDto latest)
+    {
+        double vibRisk  = Math.Min(latest.Vibration  / 15.0 * 100, 100);
+        double tempRisk = Math.Min(latest.Temperature / 70.0 * 100, 100);
+        double presRisk = Math.Min(latest.Pressure   / 6.0  * 100, 100);
+        return Math.Round((vibRisk + tempRisk + presRisk) / 3.0, 1);
+    }
+
+    private static double CalculateOee(SensorReadingDto latest)
+    {
+        double availability = latest.State switch
+        {
+            "critical"  => 60.0,
+            "degrading" => 82.0,
+            _           => 97.0,
+        };
+        double performance = Math.Max(0, Math.Min(100, (1.0 - latest.Vibration  / 20.0) * 100));
+        double quality     = Math.Max(0, Math.Min(100, (1.0 - latest.Temperature / 80.0) * 100));
+        return Math.Round(availability * performance * quality / 10_000.0, 1);
+    }
+
+    private static SensorStats AggregateStats(IEnumerable<double> values)
     {
         var list = values.ToList();
         if (list.Count == 0) return new SensorStats();
@@ -171,39 +144,40 @@ public class IoTDataService : IIoTDataService
         };
     }
 
-    private static SensorReadingDto? ParseReading(IoTData record)
+    private static void CheckThreshold(List<AlertDto> alerts, SensorReadingDto reading,
+                                       string sensor, double value)
     {
-        try
+        if (!Thresholds.TryGetValue(sensor, out var threshold)) return;
+
+        if (value >= threshold.Critical)
         {
-            using var doc = JsonDocument.Parse(record.Message);
-            var root = doc.RootElement;
-
-            string G(string key, string fallback = "") =>
-                root.TryGetProperty(key, out var p) ? p.GetString() ?? fallback : fallback;
-            double D(string key, double fallback = 0) =>
-                root.TryGetProperty(key, out var p) && p.TryGetDouble(out var v) ? v : fallback;
-
-            return new SensorReadingDto
+            alerts.Add(new AlertDto
             {
-                MachineId   = G("machine_id"),
-                MachineName = G("machine_name", G("machine_id")),
-                MachineType = G("machine_type"),
-                Area        = G("area"),
-                State       = G("state", "normal"),
-                Vibration   = D("vibration"),
-                Temperature = D("temperature"),
-                Pressure    = D("pressure"),
-                Humidity    = D("humidity"),
-                Voltage     = D("voltage"),
-                Current     = D("current"),
-                Power       = D("power"),
-                Timestamp   = G("timestamp"),
-                ReceivedAt  = record.ReceivedAt,
-            };
+                MachineId   = reading.MachineId,
+                MachineName = reading.MachineName,
+                Area        = reading.Area,
+                Severity    = "CRÍTICO",
+                Sensor      = sensor,
+                Value       = value,
+                Threshold   = threshold.Critical,
+                Message     = $"{sensor} em {value:F2} — acima do limite crítico ({threshold.Critical})",
+                DetectedAt  = reading.ReceivedAt,
+            });
         }
-        catch
+        else if (value >= threshold.Warning)
         {
-            return null;
+            alerts.Add(new AlertDto
+            {
+                MachineId   = reading.MachineId,
+                MachineName = reading.MachineName,
+                Area        = reading.Area,
+                Severity    = "ALERTA",
+                Sensor      = sensor,
+                Value       = value,
+                Threshold   = threshold.Warning,
+                Message     = $"{sensor} em {value:F2} — atenção, acima de {threshold.Warning}",
+                DetectedAt  = reading.ReceivedAt,
+            });
         }
     }
 }
