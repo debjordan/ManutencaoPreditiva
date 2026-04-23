@@ -6,4 +6,6 @@ public interface IIoTDataRepository
 {
     Task<IEnumerable<IoTData>> GetAllAsync();
     Task<IEnumerable<IoTData>> GetByMachineIdAsync(string machineId);
+    Task<IEnumerable<IoTData>> GetByMachineIdAsync(string machineId, int limit);
+    Task<IEnumerable<IoTData>> GetByMachineIdSinceAsync(string machineId, DateTime since);
 }
