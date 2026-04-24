@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -7,6 +7,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{81034408-37C8-1011-444E-4C15C2FADA8E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoTDataApi", "src\api\IoTDataApi\IoTDataApi.csproj", "{AC64DCFA-2964-9C90-9742-84549A635C50}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F1CF811E-6CA2-47DF-BA36-01D883903591}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "unit", "unit", "{25FD1C0B-9EBD-4E0A-B6CC-E1DD72C6F1AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoTDataApi.Tests", "tests\unit\IoTDataApi.Tests\IoTDataApi.Tests.csproj", "{EEA5679F-87EC-425B-8694-9DEF29DFA03F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,6 +24,10 @@ Global
 		{AC64DCFA-2964-9C90-9742-84549A635C50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC64DCFA-2964-9C90-9742-84549A635C50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC64DCFA-2964-9C90-9742-84549A635C50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEA5679F-87EC-425B-8694-9DEF29DFA03F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEA5679F-87EC-425B-8694-9DEF29DFA03F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEA5679F-87EC-425B-8694-9DEF29DFA03F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEA5679F-87EC-425B-8694-9DEF29DFA03F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -25,6 +35,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{81034408-37C8-1011-444E-4C15C2FADA8E} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{AC64DCFA-2964-9C90-9742-84549A635C50} = {81034408-37C8-1011-444E-4C15C2FADA8E}
+		{25FD1C0B-9EBD-4E0A-B6CC-E1DD72C6F1AE} = {F1CF811E-6CA2-47DF-BA36-01D883903591}
+		{EEA5679F-87EC-425B-8694-9DEF29DFA03F} = {25FD1C0B-9EBD-4E0A-B6CC-E1DD72C6F1AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5768E444-C131-4FF6-B125-09B36A63C54A}
